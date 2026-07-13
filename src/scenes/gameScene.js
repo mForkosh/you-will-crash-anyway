@@ -11,7 +11,7 @@ const configForText = {
   fontFamily: "Montserrat-bold",
   color: "#fe7411",
   fontSize: "25px",
-  align: 'center',
+  align: "center",
   shadow: {
     offsetX: 0.5,
     offsetY: 2,
@@ -31,6 +31,7 @@ export class GameScene extends Phaser.Scene {
     this.load.image("plane", "assets/images/Planes/plane-red.png");
     this.load.image("top-rock", "assets/images/rockDown.png");
     this.load.image("bot-rock", "assets/images/rock.png");
+    this.highScore = Number(window.localStorage.getItem('highScore')) || 0;
   }
 
   create() {
@@ -43,10 +44,11 @@ export class GameScene extends Phaser.Scene {
       this.scale.width,
       this.scale.height,
       "background",
-    )
+    );
 
-    const scaleImgY = this.scale.height / background.texture.getSourceImage().height;
-      
+    const scaleImgY =
+      this.scale.height / background.texture.getSourceImage().height;
+
     background.setTileScale(1, scaleImgY);
     //#endregion
 
@@ -66,24 +68,29 @@ export class GameScene extends Phaser.Scene {
       Phaser.Input.Keyboard.KeyCodes.SPACE,
     );
 
-    keyboard.space.on("down", this.jump);
-    this.input.on('pointerdown', this.jump);
+    keyboard.space.on("down", this.jump, this);
+    this.input.on("pointerdown", this.jump, this);
 
     this.time.addEvent({
       callbackScope: this,
       callback: this.createColumn,
       loop: true,
-      delay: 1500,
+      delay: 1800,
     });
 
     scoreText = this.add.text(
-      this.scale.width * 0.95,
+      this.scale.width * 0.05,
       this.scale.width / 20,
       `Score: 0`,
       configForText,
-    );
+    ).setDepth(10);
 
-    scoreText.setOrigin(1, 0).setDepth(1);
+    this.add.text(
+      this.scale.width * 0.95,
+      this.scale.width / 20,
+      `High score: ` + this.highScore,
+      configForText,
+    ).setOrigin(1, 0).setDepth(10);;
 
     scoreZone = this.physics.add.group();
     columns = this.physics.add.group();
@@ -105,11 +112,11 @@ export class GameScene extends Phaser.Scene {
 
     //#region player
     if (player.body.velocity.y > 0) {
-      player.body.rotation = 15;
+      player.angle = 15;
     } else if (player.body.velocity.y < 0) {
-      player.body.rotation = -20;
+      player.angle = -20;
     } else {
-      player.body.rotation = -12;
+      player.angle = -12;
     }
     //#endregion
 
@@ -145,8 +152,11 @@ export class GameScene extends Phaser.Scene {
     topRock.setOrigin(0.5, 1);
     botRock.setOrigin(0.5, 0);
 
-    topRock.setScale(0.5, 1.8).refreshBody();
-    botRock.setScale(0.5, 1.8).refreshBody();
+    topRock.setScale(0.5, 1.8).setSize(topRock.width * 0.8);
+    botRock.setScale(0.5, 1.8).setSize(botRock.width * 0.8);
+
+    console.log(botRock);
+    
 
     const zone = this.add.zone(
       positionX + topRock.body.width,
@@ -175,7 +185,11 @@ export class GameScene extends Phaser.Scene {
 
     this.add
       .text(this.scale.width / 2, this.scale.height / 2, text, configForText)
-      .setOrigin(0.5) ;
+      .setOrigin(0.5);
+    
+    if (this.score > this.highScore) {
+      window.localStorage.setItem('highScore', this.score);
+    }
   }
 
   giveScore(player, zone) {

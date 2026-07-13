@@ -7,19 +7,20 @@ const windoWidth = window.innerWidth;
 const windoHeight = window.innerHeight;
 
 const config = {
+  type: Phaser.AUTO,
   width: windoWidth,
   height: windoHeight,
   scene: GameScene,
   physics: {
     default: "arcade",
     arcade: {
-      debug: true,
+      debug: false,
       gravity: { y: 800 },
     },
   },
   scale: {
-    mode: Phaser.Scale.RESIZE,
-    autoCenter: Phaser.Scale.Center,
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
   },
 };
 
